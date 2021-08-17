@@ -3,7 +3,7 @@
 */
 
 #include<iostream>
-#include<deque>
+
 using namespace std;
 
 class basic{
@@ -34,6 +34,9 @@ int main(){
     int* ans = sl.max_k(arr,n,k);
 
     sl.disp_arr(ans,n-k+1);
+
+    delete []arr;
+    delete []ans;
     return 0;
 }
 
@@ -47,39 +50,53 @@ int* basic::make_arr(int n){
 }
 
 void basic::disp_arr(int* arr , int n){
-    for(int i=0; i<n; ++i){
+    for( int i = 0; i < n; ++i ){
         cout<<arr[i]<<" ";
     }
     return ;
 }
 
-int* solution::max_k(int* arr, int n, int k){
+int* solution::max_k(int* nums, int n, int k){
 
-    int* ans = new int [n-k+1];
-    deque<int> dq;
+    int * window = new int [k];
 
-    for(int i=0; i < k; ++i){
+    int * ans = new int [n - k + 1];
+
+    int front = 0 , end = -1 , size = 0;
+    for(int i = 0 ; i < k ; ++i){
         
-        while(!dq.empty() && arr[i] >= arr[dq.back()]){
-            dq.pop_back();
+        while(size > 0 && nums[window[end]] <= nums[i]){
+            size--;
+            end--;
         }
-        dq.push_back(i);
-
+        
+        end = (end + 1)%k;
+        size++;
+        
+        window[end] = i;
     }
-
-    for(int i=k ;i< n;++i){
-        ans[i-k] = arr[dq.front()];
-
-        while(!dq.empty() && dq.front() <= i-k){
-            dq.pop_front();
-        }
-
-        while(!dq.empty() && arr[i] >= arr[dq.back()]){
-            dq.pop_back();
-        }
-        dq.push_back(i);
-    }
-    ans[n-k] = arr[dq.front()];
+    ans[0] = nums[window[front]];
     
+    for(int i = k ; i < n ; ++i){
+        
+        while(size > 0 && window[front] <= i - k){
+            front = (front + 1)%k;
+        	size--;
+        }
+        
+        while(size > 0 && nums[window[end]] <= nums[i]){
+            end = (end - 1 + k)%k;
+            size--;
+        }
+        
+        end = (end + 1)%k;
+        window[end] = i;
+        size++;
+        
+        ans[i - k + 1] = nums[window[front]];
+    }
+    
+    
+    delete []window;
     return ans;
 }
